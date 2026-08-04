@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>株式用語集</title>
+<style>
+:root{--bg:#0d1117;--card:#161b22;--border:#30363d;--text:#c9d1d9;--muted:#8b949e;--blue:#4a9eff;--green:#00aa44;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Hiragino Sans','Meiryo',sans-serif;font-size:15px;line-height:1.7;padding-bottom:60px}
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:16px 20px;position:sticky;top:0;z-index:10}
+.header h1{font-size:1.2rem}
+.nav{margin-top:6px;font-size:0.85rem}
+.nav a{color:var(--blue);text-decoration:none;margin-right:16px}
+.wrap{max-width:820px;margin:0 auto;padding:20px}
+.search{width:100%;padding:14px 16px;font-size:1rem;background:var(--card);border:1px solid var(--border);
+  border-radius:10px;color:var(--text);margin-bottom:6px}
+.search:focus{outline:none;border-color:var(--blue)}
+.count{color:var(--muted);font-size:0.82rem;margin:4px 2px 16px}
+.cat{color:var(--green);font-size:0.78rem;font-weight:700;margin:22px 2px 8px}
+.item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.term{font-size:1.05rem;font-weight:700}
+.sub{color:var(--muted);font-size:0.78rem;margin:2px 0 8px}
+.desc{font-size:0.95rem}
+.tag{display:inline-block;background:var(--bg);border:1px solid var(--border);border-radius:4px;
+  padding:1px 8px;font-size:0.7rem;color:var(--muted);margin-left:8px;vertical-align:middle}
+.empty{color:var(--muted);text-align:center;padding:40px 0}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>株式用語集</h1>
+  <div class="nav"><a href="index.html">← ダッシュボードに戻る</a></div>
+</div>
+<div class="wrap">
+  <input id="q" class="search" type="search" placeholder="用語を入力して検索（例：PER、配当、RSI）" oninput="render()" autocomplete="off">
+  <div class="count" id="count"></div>
+  <div id="list"></div>
+</div>
+<script>
+const TERMS = [{"term": "PER", "sub": "株価収益率 / Price Earnings Ratio", "cat": "割安さ", "desc": "株価が「1株あたりの年間利益」の何倍かを表す数字。低いほど利益に対して株価が安い＝割安。ざっくり市場平均は15〜17倍で、15倍以下なら割安感があります。"}, {"term": "PBR", "sub": "株価純資産倍率 / Price Book-value Ratio", "cat": "割安さ", "desc": "株価が「1株あたりの会社の財産（解散したら株主が受け取る価値）」の何倍かを表す数字。1倍未満だと、会社の財産より安く株が買える状態＝割安のサイン。"}, {"term": "ROE", "sub": "自己資本利益率 / Return On Equity", "cat": "稼ぐ力", "desc": "株主から預かったお金を使って、どれだけ効率よく利益を出したかを示す「稼ぐ力」の指標。高いほど上手にお金を増やしています。10%を超えると優秀とされます。"}, {"term": "ROA", "sub": "総資産利益率 / Return On Assets", "cat": "稼ぐ力", "desc": "借金も含めた会社全体の資産を使って、どれだけ利益を出したか。ROEと一緒に見ると、借金に頼らず効率よく稼げているかが分かります。"}, {"term": "配当利回り", "sub": "はいとうりまわり", "cat": "配当", "desc": "株価に対して、1年でもらえる配当金の割合。例えば利回り4%なら、100万円分の株を持っていると年に約4万円の配当がもらえる目安です。高いほど配当が多い。"}, {"term": "配当性向", "sub": "はいとうせいこう", "cat": "配当", "desc": "会社の利益のうち、どれだけを配当として株主に配っているかの割合。低すぎると増配の余力あり、高すぎる（80%超）と無理して配当を出している可能性があり注意。"}, {"term": "自己資本比率", "sub": "じこしほんひりつ", "cat": "安全性", "desc": "会社の全財産のうち、借金ではない「自分のお金」がどれだけあるかの割合。高いほど借金が少なく、不況でも倒産しにくい安全な会社です。35%以上が一つの目安。"}, {"term": "負債比率(D/E)", "sub": "ふさいひりつ / Debt Equity Ratio", "cat": "安全性", "desc": "自分のお金に対して、借金がどれだけあるかの割合。低いほど借金が少なく安全。数字が大きい会社は金利上昇や不況に弱くなりがちです。"}, {"term": "RSI", "sub": "相対力指数 / Relative Strength Index", "cat": "売買タイミング", "desc": "株が「買われすぎか・売られすぎか」を0〜100で表す温度計のような指標。30以下は売られすぎ（反発が期待できる買い場の目安）、70以上は買われすぎ（過熱）。"}, {"term": "MACD", "sub": "マックディー / Moving Average Convergence Divergence", "cat": "売買タイミング", "desc": "株価の勢いとトレンドの変わり目を見る指標。2本の線が下から上へ交差する「ゴールデンクロス」は上昇に転じるサインとされます。"}, {"term": "ボリンジャーバンド", "sub": "Bollinger Bands", "cat": "売買タイミング", "desc": "株価が「普段どのくらいの範囲で動くか」を帯（バンド）で示したもの。株価が帯の外にはみ出すと、行き過ぎ＝反動が来やすいサインと見ます。"}, {"term": "移動平均線", "sub": "いどうへいきんせん", "cat": "売買タイミング", "desc": "過去25日や75日の株価の平均を、なめらかな線でつないだもの。株価がこの線より下にあると「短期的に売られている（割安寄り）」と判断できます。"}, {"term": "移動平均乖離率", "sub": "いどうへいきんかいりりつ", "cat": "売買タイミング", "desc": "今の株価が移動平均線からどれだけ離れているかを％で表したもの。大きくマイナス（線よりかなり下）だと、下がりすぎで反発の余地が大きいと見ます。"}, {"term": "出来高", "sub": "できだか", "cat": "売買タイミング", "desc": "その日に売買された株の数。出来高が急に増えるのは、多くの人が注目している・相場の転換点になりやすい、という注目のサインです。"}, {"term": "騰落レシオ", "sub": "とうらくレシオ", "cat": "市場全体", "desc": "市場全体で「値上がりした銘柄」と「値下がりした銘柄」の比率。70%以下は市場全体が売られすぎ（買い場の目安）、120%以上は過熱（買い控え）を示します。"}, {"term": "信用評価損益率", "sub": "しんようひょうかそんえきりつ", "cat": "市場全体", "desc": "信用取引（お金を借りて株を買う取引）をしている投資家全体が、今どれだけ含み損／含み益かを示す数字。大きくマイナスは「みんな苦しい＝底が近い」ことも。"}, {"term": "信用倍率", "sub": "しんようばいりつ", "cat": "需給", "desc": "「信用で買っている株数 ÷ 信用で売っている株数」。数字が高い（6倍超など）と、将来売られる株が多く、株価の上値が重くなりやすいサインです。"}, {"term": "52週レンジ位置", "sub": "52しゅうレンジいち", "cat": "割安さ", "desc": "過去1年間（52週）の高値〜安値の中で、今の株価がどの位置にいるか。0%＝1年で一番安い、100%＝一番高い。低いほど割安な水準にいると考えられます。"}, {"term": "時価総額", "sub": "じかそうがく", "cat": "規模", "desc": "会社全体の値段（株価 × 発行済み株数）。大きいほど大企業で、株の売り買いがしやすい（流動性が高い）＝いつでも売買しやすい安心感があります。"}, {"term": "Piotroskiスコア", "sub": "ピオトロスキースコア", "cat": "安全性", "desc": "会社の財務の健全性を9つの項目でチェックし、0〜9点で採点したもの。7点以上なら財務が優良、3点以下は要注意、という目安になります。"}, {"term": "ベータ", "sub": "Beta", "cat": "リスク", "desc": "市場全体が動いたときに、その株がどれだけ大きく動くかを表す数字。1より小さいと市場より値動きが穏やか、1より大きいと市場より激しく動きます。"}, {"term": "増配", "sub": "ぞうはい", "cat": "配当", "desc": "配当金を前の年より増やすこと。毎年増やし続ける「連続増配」の会社は、株主を大切にする優良企業のサインとされます。"}, {"term": "TOPIX500 / 規模区分", "sub": "トピックス500", "cat": "規模", "desc": "東証が「規模の大きさ」と「売買のしやすさ」で選んだ主力500社のグループ。誰もが知っているような中〜大型の有名企業が中心です。"}];
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function render(){
+  const q = (document.getElementById('q').value || '').trim().toLowerCase();
+  const rows = TERMS.filter(t =>
+    !q || t.term.toLowerCase().includes(q) || t.sub.toLowerCase().includes(q) ||
+    t.desc.toLowerCase().includes(q) || t.cat.toLowerCase().includes(q));
+  document.getElementById('count').textContent = `${rows.length} 件`;
+  const el = document.getElementById('list');
+  if(!rows.length){ el.innerHTML = '<div class="empty">該当する用語がありません</div>'; return; }
+  let html = '', cat = '';
+  rows.forEach(t => {
+    if(!q && t.cat !== cat){ cat = t.cat; html += `<div class="cat">${esc(cat)}</div>`; }
+    html += `<div class="item"><div class="term">${esc(t.term)}<span class="tag">${esc(t.cat)}</span></div>`+
+            `<div class="sub">${esc(t.sub)}</div><div class="desc">${esc(t.desc)}</div></div>`;
+  });
+  el.innerHTML = html;
+}
+render();
+</script>
+</body>
+</html>
